@@ -1,8 +1,5 @@
 module Tests exposing (tests)
 
-import Expect exposing (Expectation)
-import Fuzz exposing (Fuzzer, string)
-import Test exposing (..)
 import Week02
     exposing
         ( buildStatsUrl
@@ -12,6 +9,9 @@ import Week02
         , mkUser
         , setPhone
         )
+import Expect exposing (Expectation)
+import Fuzz exposing (Fuzzer, string)
+import Test exposing (..)
 
 
 tests : Test
