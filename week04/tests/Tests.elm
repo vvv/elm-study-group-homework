@@ -1,13 +1,22 @@
-module Tests exposing (suite)
+module Tests exposing (tests)
 
 import Expect exposing (Expectation)
 import Json.Decode as J
 import Test exposing (Test, describe, skip, test)
-import Week04 exposing (Country, Mottos, decodeMottos, decodeUser, mottos)
+import Time
+import Week04
+    exposing
+        ( Country
+        , Mottos
+        , decodeDate
+        , decodeMottos
+        , decodeUser
+        , mottos
+        )
 
 
-suite : Test
-suite =
+tests : Test
+tests =
     describe "Week 4 homework"
         [ test "decodeUser" <|
             \_ ->
@@ -26,7 +35,8 @@ suite =
                 in
                 Expect.all (List.map (always << check) samples) ()
 
-        , skip <|  -- XXX
+        , skip <|
+            -- XXX
             test "decodeMottos" <|
                 \_ ->
                     Expect.equal
@@ -47,4 +57,15 @@ suite =
                                     "EUR"
                                 ]
                         )
+
+        , test "decodeDate" <|
+            \_ ->
+                let
+                    input =
+                        "\"2018-10-01T12:48:00.000Z\""
+
+                    expected =
+                        Ok (Time.millisToPosix 1538398080000)
+                in
+                Expect.equal (J.decodeString decodeDate input) expected
         ]

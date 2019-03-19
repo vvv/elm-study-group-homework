@@ -1,9 +1,18 @@
-module Week04 exposing (Country, CountryInfo, Mottos, User, decodeMottos, decodeUser, mottos)
-
---XXX (mottos, decodeMottos, decodeUser)
+module Week04 exposing
+    (  Country
+    , Mottos
+    , User
+    , decodeDate
+    , decodeMottos
+    , decodeUser
+    , mottos
+    )
 
 import Dict exposing (Dict)
+import Iso8601
 import Json.Decode as J
+import Parser
+import Time
 
 
 type alias User =
@@ -63,3 +72,23 @@ decodeMottos =
             Mottos << Dict.values << Dict.map mkCountry
     in
     J.map countryInfosToMottos (J.dict decodeCountryInfo)
+
+
+decodeDate : J.Decoder Time.Posix
+decodeDate =
+    let
+{--
+        Parser.deadEndsToString : List DeadEnd -> String
+        Iso8601.toTime : String -> Result (List DeadEnd) Posix
+        J.string : J.Decoder String
+--}
+        parseTime : String -> J.Decoder Time.Posix
+        parseTime str =
+            case Iso8601.toTime str of
+                Err deadEnds ->
+                    J.fail (Parser.deadEndsToString deadEnds)
+
+                Ok posix ->
+                    J.succeed posix
+    in
+    J.string |> J.andThen parseTime
