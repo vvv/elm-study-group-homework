@@ -1,7 +1,9 @@
 module Week04 exposing
-    (  Country
+    ( AccountInfo
+    , Country
     , Mottos
     , User
+    , decodeAccountInfo
     , decodeDate
     , decodeMottos
     , decodeUser
@@ -77,11 +79,11 @@ decodeMottos =
 decodeDate : J.Decoder Time.Posix
 decodeDate =
     let
-{--
+        {--
         Parser.deadEndsToString : List DeadEnd -> String
         Iso8601.toTime : String -> Result (List DeadEnd) Posix
         J.string : J.Decoder String
---}
+        --}
         parseTime : String -> J.Decoder Time.Posix
         parseTime str =
             case Iso8601.toTime str of
@@ -92,3 +94,22 @@ decodeDate =
                     J.succeed posix
     in
     J.string |> J.andThen parseTime
+
+
+type alias AccountInfo =
+    { id : Int
+    , email : String
+    , full_name : Maybe String
+    , phone_number : Maybe String
+    , info_complete : Bool
+    }
+
+
+decodeAccountInfo : J.Decoder AccountInfo
+decodeAccountInfo =
+    J.map5 AccountInfo
+        (J.field "id" J.int)
+        (J.field "email" J.string)
+        (J.field "full_name" <| J.maybe J.string)
+        (J.field "phone_number" <| J.maybe J.string)
+        (J.field "info_complete" J.bool)

@@ -6,8 +6,10 @@ import Test exposing (Test, describe, skip, test)
 import Time
 import Week04
     exposing
-        ( Country
+        ( AccountInfo
+        , Country
         , Mottos
+        , decodeAccountInfo
         , decodeDate
         , decodeMottos
         , decodeUser
@@ -35,9 +37,9 @@ tests =
                 in
                 Expect.all (List.map (always << check) samples) ()
 
-        , skip <|
-            -- XXX
-            test "decodeMottos" <|
+        , skip <| -- XXX
+            test "decodeMottos"
+            <|
                 \_ ->
                     Expect.equal
                         (J.decodeString decodeMottos mottos)
@@ -68,4 +70,28 @@ tests =
                         Ok (Time.millisToPosix 1538398080000)
                 in
                 Expect.equal (J.decodeString decodeDate input) expected
+
+        , test "decodeAccountInfo" <|
+            \_ ->
+                let
+                    input =
+                        """
+                        {
+                            "id": 14,
+                            "email": "bilbo@shire.co.uk",
+                            "full_name": "Bilbo Baggins",
+                            "phone_number": null,
+                            "info_complete": false
+                        }
+                        """
+
+                    expected =
+                        Ok <|
+                            AccountInfo 14
+                                "bilbo@shire.co.uk"
+                                (Just "Bilbo Baggins")
+                                Nothing
+                                False
+                in
+                Expect.equal (J.decodeString decodeAccountInfo input) expected
         ]
