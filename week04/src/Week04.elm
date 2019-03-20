@@ -7,6 +7,7 @@ module Week04 exposing
     , decodeDate
     , decodeMottos
     , decodeUser
+    , jsonPair
     , mottos
     )
 
@@ -15,6 +16,7 @@ import Iso8601
 import Json.Decode as J
 import Parser
 import Time
+import Tuple
 
 
 type alias User =
@@ -113,3 +115,8 @@ decodeAccountInfo =
         (J.field "full_name" <| J.maybe J.string)
         (J.field "phone_number" <| J.maybe J.string)
         (J.field "info_complete" J.bool)
+
+
+jsonPair : J.Decoder a -> J.Decoder b -> J.Decoder ( a, b )
+jsonPair a b =
+    J.map2 Tuple.pair (J.index 0 a) (J.index 1 b)

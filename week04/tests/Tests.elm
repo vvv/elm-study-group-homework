@@ -13,6 +13,7 @@ import Week04
         , decodeDate
         , decodeMottos
         , decodeUser
+        , jsonPair
         , mottos
         )
 
@@ -94,4 +95,18 @@ tests =
                                 False
                 in
                 Expect.equal (J.decodeString decodeAccountInfo input) expected
+
+        , test "jsonPair" <|
+            \_ ->
+                let
+                    input =
+                        "[\"abc\", 123]"
+
+                    expected =
+                        Ok ( "abc", 123 )
+
+                    decode =
+                        jsonPair J.string J.int
+                in
+                Expect.equal (J.decodeString decode input) expected
         ]
