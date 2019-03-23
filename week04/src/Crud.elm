@@ -4,7 +4,6 @@ import Browser
 import Html exposing (..)
 import Html.Attributes as A
 import Html.Events exposing (onClick, onInput)
-import List.Zipper as Z
 
 
 main : Program () Model Msg
@@ -28,7 +27,8 @@ type alias Person =
 
 
 type alias Model =
-    { db : Z.Zipper Person
+    { db : List Person
+    , selected : Maybe Person
     , filter : String
     , entry : Person
     }
@@ -36,15 +36,16 @@ type alias Model =
 
 init : Model
 init =
+    let
+        roma =
+            Person "Roman" "Tisch"
+    in
     { db =
-        Z.Zipper
-            (List.reverse
-                [ Person "Hans" "Emil"
-                , Person "Max" "Mustermann"
-                ]
-            )
-            (Person "Roman" "Tisch")
-            []
+        [ Person "Hans" "Emil"
+        , Person "Max" "Mustermann"
+        , roma
+        ]
+    , selected = Just roma
     , filter = ""
     , entry = Person "John" "Romba"
     }
@@ -75,25 +76,19 @@ update msg model =
             Debug.todo "XXX IMPLEMENTME"
 
         Delete ->
-            let
-                db =
-                    model.db
-            in
-            { model | db = Z.withDefault (Person "XXX" "XXX") <| Z.fromList (Z.before db ++ Z.after db) }
+            case model.selected of
+                Nothing ->
+                    model
+
+                Just selected ->
+                    let
+                        db_ =
+                            List.filter (\x -> x /= selected) model.db
+                    in
+                    { model | db = db_, selected = Nothing }
 
         Select str ->
-            case Z.findFirst (\x -> x == personFromString str) model.db of
-                Just z ->
-                    { model | db = z }
-
-                Nothing ->
-                    let
-                        _ =
-                            Debug.log
-                                ("Impossible happened! " ++ "(str, model.db)")
-                                ( str, model.db )
-                    in
-                    model
+            { model | selected = Just (personFromString str) }
 
         SetFilter str ->
             { model | filter = str }
@@ -135,24 +130,38 @@ personFromString str =
             Person "" ""
 
 
-personToOption : Bool -> Person -> Html Msg
-personToOption selected person =
-    let
-        str =
-            personToString person
-    in
-    option [ A.value str, A.selected selected ] [ text str ]
+isNothing : Maybe a -> Bool
+isNothing m =
+    case m of
+        Nothing ->
+            True
+
+        Just _ ->
+            False
 
 
 view : Model -> Html Msg
 view model =
     let
-        selectOptions =
-            List.concat
-                [ List.map (personToOption False) (Z.before model.db)
-                , [ personToOption True <| Z.current model.db ]
-                , List.map (personToOption False) (Z.after model.db)
-                ]
+        moption : Person -> Maybe (Html Msg)
+        moption person =
+            let
+                str =
+                    personToString person
+            in
+            if String.startsWith model.filter str then
+                Just <|
+                    option
+                        [ A.value str
+                        , A.selected (Just person == model.selected)
+                        ]
+                        [ text str ]
+
+            else
+                Nothing
+
+        nothingSelected =
+            isNothing model.selected
     in
     div []
         [ div []
@@ -163,7 +172,11 @@ view model =
                 ]
                 []
             ]
-        , div [] [ select [ A.size 6, onInput Select ] selectOptions ]
+        , div []
+            [ select
+                [ A.size 6, onInput Select ]
+                (List.filterMap moption model.db)
+            ]
         , div []
             [ text "Name: "
             , input
@@ -182,7 +195,15 @@ view model =
             ]
         , div []
             [ button [ onClick Create ] [ text "Create" ]
-            , button [ onClick Update ] [ text "Update" ]
-            , button [ onClick Delete ] [ text "Delete" ]
+            , button
+                [ onClick Update
+                , A.disabled nothingSelected
+                ]
+                [ text "Update" ]
+            , button
+                [ onClick Delete
+                , A.disabled nothingSelected
+                ]
+                [ text "Delete" ]
             ]
         ]
