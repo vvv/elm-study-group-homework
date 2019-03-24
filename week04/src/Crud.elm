@@ -4,6 +4,7 @@ import Browser
 import Html exposing (..)
 import Html.Attributes as A
 import Html.Events exposing (onClick, onInput)
+import List.Zipper as Z
 
 
 main : Program () Model Msg
@@ -80,7 +81,23 @@ update msg model =
                 { model | db = db_, entry = Person "" "" }
 
         Update ->
-            Debug.todo "XXX IMPLEMENTME"
+            let
+                mdb_ =
+                    model.db
+                        |> Z.fromList
+                        |> Maybe.andThen
+                            (Z.find <|
+                                \x -> Just x == model.selected
+                            )
+                        |> Maybe.map (Z.mapCurrent <| \_ -> model.entry)
+                        |> Maybe.map Z.toList
+            in
+            case mdb_ of
+                Just db_ ->
+                    { model | db = db_ }
+
+                Nothing ->
+                    Debug.todo "Impossible happened"
 
         Delete ->
             case model.selected of
@@ -135,6 +152,7 @@ personFromString str =
 
         [] ->
             Person "" ""
+
 
 personIsEmpty : Person -> Bool
 personIsEmpty person =
