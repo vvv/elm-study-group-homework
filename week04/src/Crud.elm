@@ -71,14 +71,14 @@ update : Msg -> Model -> Model
 update msg model =
     case msg of
         Create ->
-            let
-                db_ =
-                    model.db ++ [ model.entry ]
-            in
             if personIsEmpty model.entry then
                 model
             else
-                { model | db = db_, entry = Person "" "" }
+                let
+                    db_ =
+                        model.db ++ [ model.entry ]
+                in
+                    { model | db = db_, entry = Person "" "" }
 
         Update ->
             let
@@ -230,7 +230,7 @@ view model =
                 [ text "Create" ]
             , button
                 [ onClick Update
-                , A.disabled nothingSelected
+                , A.disabled (nothingSelected || personIsEmpty model.entry)
                 ]
                 [ text "Update" ]
             , button
