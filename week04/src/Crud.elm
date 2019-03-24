@@ -70,7 +70,14 @@ update : Msg -> Model -> Model
 update msg model =
     case msg of
         Create ->
-            Debug.todo "XXX IMPLEMENTME"
+            let
+                db_ =
+                    model.db ++ [ model.entry ]
+            in
+            if personIsEmpty model.entry then
+                model
+            else
+                { model | db = db_, entry = Person "" "" }
 
         Update ->
             Debug.todo "XXX IMPLEMENTME"
@@ -128,6 +135,10 @@ personFromString str =
 
         [] ->
             Person "" ""
+
+personIsEmpty : Person -> Bool
+personIsEmpty person =
+    String.isEmpty person.name && String.isEmpty person.surname
 
 
 isNothing : Maybe a -> Bool
@@ -194,7 +205,11 @@ view model =
                 []
             ]
         , div []
-            [ button [ onClick Create ] [ text "Create" ]
+            [ button
+                [ onClick Create
+                , A.disabled (personIsEmpty model.entry)
+                ]
+                [ text "Create" ]
             , button
                 [ onClick Update
                 , A.disabled nothingSelected
