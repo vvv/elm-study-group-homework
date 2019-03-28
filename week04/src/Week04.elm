@@ -4,6 +4,7 @@ module Week04 exposing
     , Mottos
     , User
     , decodeAccountInfo
+    , decodeAccountInfo_
     , decodeDate
     , decodeMottos
     , decodeUser
@@ -14,6 +15,7 @@ module Week04 exposing
 import Dict exposing (Dict)
 import Iso8601
 import Json.Decode as J
+import Json.Decode.Pipeline exposing (required)
 import Parser
 import Time
 import Tuple
@@ -109,6 +111,16 @@ type alias AccountInfo =
 
 decodeAccountInfo : J.Decoder AccountInfo
 decodeAccountInfo =
+    J.succeed AccountInfo
+        |> required "id" J.int
+        |> required "email" J.string
+        |> required "full_name" (J.maybe J.string)
+        |> required "phone_number" (J.maybe J.string)
+        |> required "info_complete" J.bool
+
+
+decodeAccountInfo_ : J.Decoder AccountInfo
+decodeAccountInfo_ =
     J.map5 AccountInfo
         (J.field "id" J.int)
         (J.field "email" J.string)

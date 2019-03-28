@@ -10,6 +10,7 @@ import Week04
         , Country
         , Mottos
         , decodeAccountInfo
+        , decodeAccountInfo_
         , decodeDate
         , decodeMottos
         , decodeUser
@@ -93,8 +94,14 @@ tests =
                                 (Just "Bilbo Baggins")
                                 Nothing
                                 False
+
+                    check decoder =
+                        Expect.equal (J.decodeString decoder input) expected
+
+                    decoders =
+                        [ decodeAccountInfo, decodeAccountInfo_ ]
                 in
-                Expect.equal (J.decodeString decodeAccountInfo input) expected
+                Expect.all (List.map (always << check) decoders) ()
 
         , test "jsonPair" <|
             \_ ->
